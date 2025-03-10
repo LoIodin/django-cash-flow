@@ -26,7 +26,7 @@ class SubcategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CashFlowSerializer(serializers.ModelSerializer):
+class CashFlowSerializer(serializers.HyperlinkedModelSerializer):
     # делаем корректное отображение названий полей, а не их идентификаторов
     status = serializers.SlugRelatedField(
         slug_field='name',
@@ -48,6 +48,7 @@ class CashFlowSerializer(serializers.ModelSerializer):
     class Meta:
         model = CashFlow
         fields = [
+            'url',
             'created_at',
             'status',
             'type_cash_flow',
@@ -59,7 +60,8 @@ class CashFlowSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at']
 
     # проверка на правильность подкатегории
-    def validate(self, attrs):
+    @staticmethod
+    def validate(attrs):
         category_cash_flow = attrs.get('category_cash_flow')
         subcategory_cash_flow = attrs.get('subcategory_cash_flow')
 
@@ -68,3 +70,8 @@ class CashFlowSerializer(serializers.ModelSerializer):
                 'subcategory_cash_flow': 'Подкатегория должна принадлежать выбранной категории.'
             })
         return attrs
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['amount'] = f"{representation['amount']} ₽"
+        return representation

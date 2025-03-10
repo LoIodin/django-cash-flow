@@ -33,9 +33,6 @@ class CashFlowAdmin(admin.ModelAdmin):
         'comment',
     ]
 
-    # list_display = ('id', 'status', 'type_cash_flow', 'amount')
-    # filter_horizontal = ('category_cash_flow', 'subcategory_cash_flow')
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

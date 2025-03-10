@@ -6,6 +6,7 @@ from django.utils import timezone
 
 class Status(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    key = models.CharField(primary_key=True, max_length=50)
 
     class Meta:
         verbose_name = 'Статус'
@@ -17,6 +18,8 @@ class Status(models.Model):
 
 class TypeCashFlow(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    key = models.CharField(primary_key=True, max_length=50)
+
 
     class Meta:
         verbose_name = 'Тип'
@@ -27,19 +30,24 @@ class TypeCashFlow(models.Model):
 
 
 class Category(models.Model):
+    type = models.ForeignKey(TypeCashFlow, on_delete=models.CASCADE, verbose_name='Тип')
     name = models.CharField(max_length=50, unique=True)
+    key = models.CharField(primary_key=True, max_length=50)
+
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.name
+        return f'{self.type} → {self.name}'
 
 
 class Subcategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
     name = models.CharField(max_length=50)
+    key = models.CharField(primary_key=True, max_length=50)
+
 
     class Meta:
         unique_together = ('category', 'name')
@@ -63,6 +71,10 @@ class CashFlow(models.Model):
         if self.subcategory_cash_flow and self.subcategory_cash_flow.category != self.category_cash_flow:
             raise ValidationError({
                 'subcategory_cash_flow': 'Подкатегория должна принадлежать выбранной категории.'
+            })
+        if self.category_cash_flow and self.category_cash_flow.type != self.type_cash_flow:
+            raise ValidationError({
+                'category_cash_flow': 'Категория должна принадлежать выбранному типу.'
             })
 
     class Meta:
